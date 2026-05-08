@@ -21,7 +21,8 @@
                             red: '#EF4444',
                             light: '#F8FAFC',
                             orange: '#EA580C',
-                            cyan: '#22D3EE'
+                            cyan: '#22D3EE',
+                            bg: '#050810'
                         }
                     },
                     fontFamily: {
@@ -33,6 +34,8 @@
                         'float': 'float 4s ease-in-out infinite',
                         'float-fast': 'float 2s ease-in-out infinite',
                         'scan': 'scan 2s linear infinite',
+                        'ping-slow': 'ping 2.5s cubic-bezier(0, 0, 0.2, 1) infinite',
+                        'spin-slow': 'spin 8s linear infinite',
                     },
                     keyframes: {
                         float: {
@@ -61,10 +64,21 @@
                 background: linear-gradient(to bottom, transparent 50%, rgba(6, 182, 212, 0.1) 51%);
                 background-size: 100% 4px;
             }
+            
+            /* 悬浮提示框样式 */
+            .tooltip .tooltip-text {
+                visibility: hidden;
+                opacity: 0;
+                transition: opacity 0.3s;
+            }
+            .tooltip:hover .tooltip-text {
+                visibility: visible;
+                opacity: 1;
+            }
         }
     </style>
 </head>
-<body class="bg-cyber-dark text-cyber-light font-cyber bg-grid min-h-screen">
+<body class="bg-cyber-bg text-cyber-light font-cyber bg-grid min-h-screen">
     <div id="start-page" class="container mx-auto px-4 py-16 flex flex-col items-center justify-center min-h-screen">
         <div class="animate-float text-center mb-10">
             <h1 class="text-[clamp(2rem,5vw,4rem)] font-bold text-cyber-purple text-shadow-glow mb-2">
@@ -73,13 +87,13 @@
             <p class="text-cyber-blue text-lg md:text-xl opacity-80">Cyber-Thesis Syndrome Indicators (CTSI)</p>
         </div>
 
-        <div class="bg-white/5 backdrop-blur-md rounded-2xl p-8 w-full max-w-2xl border border-cyber-purple/30 mb-10">
+        <div class="bg-white/5 backdrop-blur-md rounded-2xl p-8 w-full max-w-2xl border border-cyber-purple/30 mb-10 shadow-[0_0_30px_rgba(124,58,237,0.15)]">
             <p class="text-lg mb-4">📝 本测试基于真实毕设临床指征研发</p>
             <ul class="space-y-2 mb-6 text-gray-300">
                 <li><i class="fa-solid fa-bug text-cyber-pink w-6"></i> 4大维度：精神图腾 | 生产力工具 | 师门外交 | 数据玄学</li>
                 <li><i class="fa-solid fa-flask-vial text-cyber-blue w-6"></i> 16种毕设人格简图，精准贴脸</li>
                 <li><i class="fa-solid fa-file-medical text-cyber-yellow w-6"></i> 生成极度扎心的万字人格诊断报告</li>
-                <li><i class="fa-solid fa-user-group text-cyber-purple w-6"></i> 自动测算导师羁绊指数(ABI)</li>
+                <li><i class="fa-solid fa-radar text-cyber-purple w-6"></i> 全息 16 宫格人格雷达分布 (双极光谱计分版)</li>
             </ul>
             <p class="text-sm text-white/60">共 20 题，约 2 分钟 | 纯本地运行 | 无需登录</p>
         </div>
@@ -95,16 +109,16 @@
                 <h2 class="text-2xl font-bold text-cyber-blue">赛博毕设确诊中...</h2>
                 <span id="progress-text" class="text-cyber-pink font-semibold">0/20</span>
             </div>
-            <div class="w-full bg-white/10 h-2 rounded-full mb-10">
-                <div id="progress-bar" class="bg-gradient-to-r from-cyber-blue to-cyber-purple h-2 rounded-full w-0 transition-all"></div>
+            <div class="w-full bg-white/10 h-2 rounded-full mb-10 overflow-hidden">
+                <div id="progress-bar" class="bg-gradient-to-r from-cyber-blue to-cyber-purple h-2 rounded-full w-0 transition-all shadow-[0_0_10px_currentColor]"></div>
             </div>
-            <div id="question-container" class="bg-white/5 backdrop-blur-md rounded-2xl p-6 md:p-8 border border-cyber-blue/30 min-h-[250px]">
+            <div id="question-container" class="bg-white/5 backdrop-blur-md rounded-2xl p-6 md:p-8 border border-cyber-blue/30 min-h-[250px] shadow-[0_0_20px_rgba(6,182,212,0.1)]">
                 <h3 id="question-text" class="text-xl md:text-2xl font-semibold mb-6 leading-relaxed">加载题目...</h3>
                 <div id="options-container" class="space-y-4"></div>
             </div>
             <div class="mt-8 flex justify-between">
                 <button id="prev-btn" class="px-6 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition hidden">上一题</button>
-                <button id="next-btn" class="px-6 py-2 bg-cyber-blue rounded-lg hover:bg-cyber-blue/80 transition ml-auto font-bold">下一题</button>
+                <button id="next-btn" class="px-6 py-2 bg-cyber-blue rounded-lg hover:bg-cyber-blue/80 transition ml-auto font-bold shadow-[0_0_15px_rgba(6,182,212,0.5)]">下一题</button>
             </div>
         </div>
     </div>
@@ -112,111 +126,178 @@
     <div id="result-page" class="hidden container mx-auto px-4 py-10 min-h-screen flex flex-col items-center justify-center">
         <div class="text-center mb-6">
             <h2 class="text-3xl md:text-4xl font-bold text-cyber-pink text-shadow-glow mb-2">确诊成功！</h2>
-            <p class="text-cyber-light/70">你的赛博毕设人格、诊断报告与羁绊已生成</p>
+            <p class="text-cyber-light/70">你的赛博毕设人格、诊断报告与全息象限分布已生成</p>
         </div>
 
-        <div class="bg-white/5 backdrop-blur-lg rounded-3xl p-6 md:p-8 w-full max-w-3xl border border-cyber-purple/40 mb-8 relative overflow-hidden">
-            <div class="flex justify-center items-center py-6 mb-2">
-                <i id="result-icon" class="fa-solid fa-ghost text-8xl animate-float-fast"></i>
-            </div>
-            
-            <div id="result-type" class="text-center text-3xl font-bold text-white mb-2 tracking-wide"></div>
-            <div id="result-code" class="text-center text-lg text-white/50 mb-6 font-mono tracking-widest"></div>
-            <div id="result-desc" class="text-gray-200 leading-relaxed text-center mb-6 text-lg font-medium"></div>
-            <div id="result-tags" class="flex flex-wrap justify-center gap-2 mb-8"></div>
+        <div class="bg-white/5 backdrop-blur-lg rounded-3xl p-6 md:p-8 w-full max-w-5xl border border-cyber-purple/40 mb-8 relative overflow-hidden shadow-[0_0_40px_rgba(124,58,237,0.15)]">
+            <div class="flex flex-col lg:flex-row gap-8">
+                
+                <div class="flex-1">
+                    <div class="flex justify-center items-center py-4 mb-2">
+                        <i id="result-icon" class="fa-solid fa-ghost text-7xl animate-float-fast"></i>
+                    </div>
+                    <div id="result-type" class="text-center text-3xl font-bold text-white mb-2 tracking-wide"></div>
+                    <div id="result-code" class="text-center text-base text-white/50 mb-4 font-mono tracking-widest"></div>
+                    <div id="result-desc" class="text-gray-200 leading-relaxed text-center mb-6 text-base font-medium"></div>
+                    <div id="result-tags" class="flex flex-wrap justify-center gap-2 mb-8"></div>
 
-            <div class="bg-black/40 rounded-xl border border-cyber-blue/30 relative overflow-hidden mb-8 shadow-[0_0_15px_rgba(6,182,212,0.1)]">
-                <div class="scanline absolute inset-0 pointer-events-none opacity-50"></div>
-                <div class="bg-cyber-blue/10 px-4 py-2 border-b border-cyber-blue/30 flex items-center justify-between">
-                    <span class="font-mono text-cyber-blue text-sm"><i class="fa-solid fa-terminal mr-2"></i>CTSI_Diagnostic_Report.log</span>
-                    <span class="flex gap-2"><div class="w-3 h-3 rounded-full bg-cyber-red"></div><div class="w-3 h-3 rounded-full bg-cyber-yellow"></div><div class="w-3 h-3 rounded-full bg-cyber-green"></div></span>
+                    <div class="bg-black/60 rounded-xl border border-cyber-blue/30 relative overflow-hidden shadow-[0_0_15px_rgba(6,182,212,0.15)]">
+                        <div class="scanline absolute inset-0 pointer-events-none opacity-50"></div>
+                        <div class="bg-cyber-blue/10 px-4 py-2 border-b border-cyber-blue/30 flex items-center justify-between">
+                            <span class="font-mono text-cyber-blue text-sm"><i class="fa-solid fa-terminal mr-2"></i>CTSI_Report.log</span>
+                        </div>
+                        <div class="p-5 font-mono text-sm leading-relaxed text-gray-300">
+                            <div class="mb-4">
+                                <h5 class="text-cyber-pink font-bold mb-1">> [ 核心病理 ]</h5>
+                                <p id="report-core" class="pl-3 border-l-2 border-cyber-pink/50"></p>
+                            </div>
+                            <div class="mb-4">
+                                <h5 class="text-cyber-yellow font-bold mb-1">> [ 生存指南 ]</h5>
+                                <p id="report-guide" class="pl-3 border-l-2 border-cyber-yellow/50"></p>
+                            </div>
+                            <div>
+                                <h5 class="text-cyber-green font-bold mb-1">> [ 最终出路 ]</h5>
+                                <p id="report-fate" class="pl-3 border-l-2 border-cyber-green/50"></p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="p-5 font-mono text-sm md:text-base leading-relaxed text-gray-300">
-                    <div class="mb-4">
-                        <h5 class="text-cyber-pink font-bold mb-1">>> [ 核心病理 ]</h5>
-                        <p id="report-core" class="pl-4 border-l-2 border-cyber-pink/50"></p>
-                    </div>
-                    <div class="mb-4">
-                        <h5 class="text-cyber-yellow font-bold mb-1">>> [ 生存指南 ]</h5>
-                        <p id="report-guide" class="pl-4 border-l-2 border-cyber-yellow/50"></p>
-                    </div>
-                    <div>
-                        <h5 class="text-cyber-green font-bold mb-1">>> [ 最终出路 ]</h5>
-                        <p id="report-fate" class="pl-4 border-l-2 border-cyber-green/50"></p>
-                    </div>
-                </div>
-            </div>
 
-            <div class="bg-white/5 rounded-xl p-5 border border-white/10">
-                <h4 class="text-center text-gray-300 font-bold mb-3 text-lg"><i class="fa-solid fa-link mr-2"></i>导师羁绊指数 (ABI)</h4>
-                <div id="abi-level" class="text-center text-2xl font-bold mb-2"></div>
-                <div id="abi-desc" class="text-sm text-white/70 text-center"></div>
+                <div class="flex-1 flex flex-col gap-6 w-full max-w-sm mx-auto lg:max-w-none">
+                    
+                    <div class="bg-black/40 rounded-2xl p-6 border border-cyber-purple/30 flex-grow flex flex-col shadow-inner relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-b from-transparent to-cyber-blue/5 pointer-events-none"></div>
+                        <h4 class="text-center text-gray-100 font-bold mb-6 text-base tracking-widest text-shadow-glow"><i class="fa-solid fa-radar mr-2"></i>16人格分布象限雷达</h4>
+                        
+                        <div class="relative w-full aspect-square rounded-xl bg-[#0a0d16] border-2 border-cyber-purple/50 overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.9)_inset]">
+                            
+                            <div class="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
+
+                            <div class="absolute top-0 left-0 w-1/2 h-1/2 bg-gradient-to-br from-cyber-red/20 to-transparent flex items-center justify-center overflow-hidden">
+                                <i class="fa-solid fa-fire-flame-curved text-[10rem] text-cyber-red/10 -rotate-12 absolute -translate-x-4 -translate-y-4"></i>
+                                <span class="text-cyber-red/30 font-black text-2xl tracking-widest z-0 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]">狂战士派</span>
+                            </div>
+
+                            <div class="absolute top-0 right-0 w-1/2 h-1/2 bg-gradient-to-bl from-cyber-purple/20 to-transparent flex items-center justify-center overflow-hidden">
+                                <i class="fa-solid fa-mask text-[10rem] text-cyber-purple/10 rotate-12 absolute translate-x-4 -translate-y-4"></i>
+                                <span class="text-cyber-purple/30 font-black text-2xl tracking-widest z-0 drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]">法外狂徒</span>
+                            </div>
+
+                            <div class="absolute bottom-0 left-0 w-1/2 h-1/2 bg-gradient-to-tr from-cyber-cyan/20 to-transparent flex items-center justify-center overflow-hidden">
+                                <i class="fa-solid fa-link text-[10rem] text-cyber-cyan/10 -rotate-45 absolute -translate-x-4 translate-y-4"></i>
+                                <span class="text-cyber-cyan/30 font-black text-2xl tracking-widest z-0 drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]">牛马派</span>
+                            </div>
+
+                            <div class="absolute bottom-0 right-0 w-1/2 h-1/2 bg-gradient-to-tl from-cyber-pink/20 to-transparent flex items-center justify-center overflow-hidden">
+                                <i class="fa-solid fa-flask-vial text-[10rem] text-cyber-pink/10 rotate-12 absolute translate-x-4 translate-y-4"></i>
+                                <span class="text-cyber-pink/30 font-black text-2xl tracking-widest z-0 drop-shadow-[0_0_8px_rgba(236,72,153,0.5)]">暗黑炼丹</span>
+                            </div>
+
+                            <div class="absolute top-1/2 left-1/2 w-20 h-20 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#050810] border-2 border-cyber-purple/40 shadow-[0_0_30px_rgba(124,58,237,0.5)] z-10 flex items-center justify-center pointer-events-none">
+                                <div class="w-14 h-14 rounded-full border-[3px] border-cyber-blue/50 border-dashed animate-spin-slow"></div>
+                                <div class="absolute w-8 h-8 rounded-full border border-cyber-pink/60 animate-pulse-slow"></div>
+                            </div>
+
+                            <div class="absolute inset-y-8 left-1/2 w-[2px] -translate-x-1/2 bg-gradient-to-b from-cyber-red via-transparent to-cyber-blue shadow-[0_0_12px_currentColor] z-10 opacity-80 pointer-events-none"></div>
+                            <div class="absolute inset-x-8 top-1/2 h-[2px] -translate-y-1/2 bg-gradient-to-r from-cyber-green via-transparent to-cyber-pink shadow-[0_0_12px_currentColor] z-10 opacity-80 pointer-events-none"></div>
+
+                            <div class="absolute top-2 left-1/2 -translate-x-1/2 flex flex-col items-center z-10 pointer-events-none">
+                                <i class="fa-solid fa-caret-up text-cyber-red drop-shadow-[0_0_5px_currentColor]"></i>
+                                <span class="text-cyber-red font-bold text-[11px] drop-shadow-[0_0_5px_currentColor] mt-0.5 bg-black/50 px-1 rounded">发癫/硬刚</span>
+                            </div>
+                            <div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex flex-col items-center z-10 pointer-events-none">
+                                <span class="text-cyber-blue font-bold text-[11px] drop-shadow-[0_0_5px_currentColor] mb-0.5 bg-black/50 px-1 rounded">内耗/认怂</span>
+                                <i class="fa-solid fa-caret-down text-cyber-blue drop-shadow-[0_0_5px_currentColor]"></i>
+                            </div>
+                            <div class="absolute left-2 top-1/2 -translate-y-1/2 flex items-center z-10 pointer-events-none">
+                                <i class="fa-solid fa-caret-left text-cyber-green drop-shadow-[0_0_5px_currentColor]"></i>
+                                <span class="text-cyber-green font-bold text-[11px] origin-left -rotate-90 whitespace-nowrap drop-shadow-[0_0_5px_currentColor] ml-3 bg-black/50 px-1 rounded">真实/手工</span>
+                            </div>
+                            <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center z-10 pointer-events-none">
+                                <span class="text-cyber-pink font-bold text-[11px] origin-right rotate-90 whitespace-nowrap drop-shadow-[0_0_5px_currentColor] mr-3 bg-black/50 px-1 rounded">魔法/赛博</span>
+                                <i class="fa-solid fa-caret-right text-cyber-pink drop-shadow-[0_0_5px_currentColor]"></i>
+                            </div>
+
+                            <div id="quadrant-dots-container" class="absolute inset-0 z-20"></div>
+                            
+                        </div>
+                    </div>
+
+                    <div class="bg-white/5 rounded-xl p-5 border border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
+                        <h4 class="text-center text-gray-300 font-bold mb-2 text-sm"><i class="fa-solid fa-link mr-2"></i>导师羁绊指数 (ABI)</h4>
+                        <div id="abi-level" class="text-center text-2xl font-bold mb-1"></div>
+                        <div id="abi-desc" class="text-sm text-white/70 text-center"></div>
+                    </div>
+                </div>
+                
             </div>
         </div>
 
         <div class="flex flex-col sm:flex-row gap-4 w-full max-w-md">
-            <button id="restart-btn" class="flex-1 bg-white/10 hover:bg-white/20 py-3 rounded-xl transition font-bold"><i class="fa-solid fa-rotate-right mr-2"></i>重新确诊</button>
+            <button id="restart-btn" class="flex-1 bg-white/10 hover:bg-white/20 py-3 rounded-xl transition font-bold shadow-[0_0_15px_rgba(255,255,255,0.05)]"><i class="fa-solid fa-rotate-right mr-2"></i>重新确诊</button>
             <button id="share-btn" class="flex-1 bg-gradient-to-r from-cyber-purple to-cyber-pink py-3 rounded-xl transition hover:brightness-110 font-bold border-glow border-cyber-pink/50"><i class="fa-solid fa-share-nodes mr-2"></i>分享病历</button>
         </div>
     </div>
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // 20题 4选项 高分辨率题库 (保持不变)
+        // 🌟 题库优化版：使用正负连续光谱积分系
+        // 负值代表：内耗(Y)、手工(A)、认怂(S)、真实(P)
+        // 正值代表：发癫(D)、赛博(C)、硬刚(H)、魔法(M)
         const questions = [
             { q: "热注入法合成时，温度波动导致前驱体溶液变成了诡异的黑色废液，此时你：", options: [
-                { t: "关掉加热包瘫在椅子上，怀疑自己是不是天生就不配搞科研", dim: "spirit", val: "Y" },
-                { t: "强装镇定去洗烧杯，但在水槽前偷偷抹眼泪", dim: "spirit", val: "Y" },
-                { t: "拍照发朋友圈：'家人们，今天又炼出一锅先锋艺术品！'", dim: "spirit", val: "D" },
-                { t: "盯着废液狂笑，并在脑海中把反应釜炸了一百遍", dim: "spirit", val: "D" }
+                { t: "关掉加热包瘫在椅子上，怀疑自己是不是天生就不配搞科研", dim: "spirit", score: -2 },
+                { t: "强装镇定去洗烧杯，但在水槽前偷偷抹眼泪", dim: "spirit", score: -1 },
+                { t: "拍照发朋友圈：'家人们，今天又炼出一锅先锋艺术品！'", dim: "spirit", score: 1 },
+                { t: "盯着废液狂笑，并在脑海中把反应釜炸了一百遍", dim: "spirit", score: 2 }
             ]},
             { q: "四月底死线逼近，需要憋出一份关于“应用前景”的宏大结论，你会：", options: [
-                { t: "翻阅几十篇文献逐字手敲，哪怕写得像干巴巴的实验报告", dim: "tool", val: "A" },
-                { t: "把别人论文的结论复制下来，疯狂同义词替换手动降重", dim: "tool", val: "A" },
-                { t: "让大模型扮演资深教授，帮我扩写得宏大一点，带赛博味", dim: "tool", val: "C" },
-                { t: "输入关键词让AI一键生成三千字排比句，只看个大意就复制", dim: "tool", val: "C" }
+                { t: "翻阅几十篇文献逐字手敲，哪怕写得像干巴巴的实验报告", dim: "tool", score: -2 },
+                { t: "把别人论文的结论复制下来，疯狂同义词替换手动降重", dim: "tool", score: -1 },
+                { t: "让大模型扮演资深教授，帮我扩写得宏大一点，带赛博味", dim: "tool", score: 1 },
+                { t: "输入关键词让AI一键生成三千字排比句，只看个大意就复制", dim: "tool", score: 2 }
             ]},
             { q: "前两天刚因为进度把导师惹毛了，今天却必须交论文初稿，你选择：", options: [
-                { t: "在微信反复删改'老师对不起…'，最后吓得拖到半夜发邮件", dim: "diplo", val: "S" },
-                { t: "找同门师姐帮忙转发，假装自己是个透明人", dim: "diplo", val: "S" },
-                { t: "早上9点面不改色发过去，附带一个卖萌表情包试探底线", dim: "diplo", val: "H" },
-                { t: "甩过去不带一句废话：'初稿已交'，大不了再被骂一顿", dim: "diplo", val: "H" }
+                { t: "在微信反复删改'老师对不起…'，最后吓得拖到半夜发邮件", dim: "diplo", score: -2 },
+                { t: "找同门师姐帮忙转发，假装自己是个透明人", dim: "diplo", score: -1 },
+                { t: "早上9点面不改色发过去，附带一个卖萌表情包试探底线", dim: "diplo", score: 1 },
+                { t: "甩过去不带一句废话：'初稿已交'，大不了再被骂一顿", dim: "diplo", score: 2 }
             ]},
             { q: "费劲算出的衍射环倒易空间d值，怎么都对不上标准卡片的晶面间距：", options: [
-                { t: "陷入极度痛苦，认为实验彻底失败，准备重做样品", dim: "data", val: "P" },
-                { t: "老老实实拿尺子在屏幕上重新量十遍，比对到老眼昏花", dim: "data", val: "P" },
-                { t: "眉头一皱：'解释成配体引起的晶格畸变，数据它就是对的！'", dim: "data", val: "M" },
-                { t: "在作图软件里拉伸X轴，误差项写大一点，不细看就是完美的", dim: "data", val: "M" }
+                { t: "陷入极度痛苦，认为实验彻底失败，准备重做样品", dim: "data", score: -2 },
+                { t: "老老实实拿尺子在屏幕上重新量十遍，比对到老眼昏花", dim: "data", score: -1 },
+                { t: "眉头一皱：'解释成配体引起的晶格畸变，数据它就是对的！'", dim: "data", score: 1 },
+                { t: "在作图软件里拉伸X轴，误差项写大一点，不细看就是完美的", dim: "data", score: 2 }
             ]},
             { q: "处理光谱数据时，根本找不到你想要的关键信号：", options: [
-                { t: "默默关掉Origin软件，躺在宿舍床上自闭一整天", dim: "spirit", val: "Y" },
-                { t: "一边叹气一边更换测试参数，准备再测十遍", dim: "spirit", val: "Y" },
-                { t: "指着屏幕上的噪点大呼小叫：'这就是新物理现象的证据！'", dim: "spirit", val: "D" },
-                { t: "精神极度亢奋，觉得自己发现了推翻现有理论的漏洞", dim: "spirit", val: "D" }
+                { t: "默默关掉Origin软件，躺在宿舍床上自闭一整天", dim: "spirit", score: -2 },
+                { t: "一边叹气一边更换测试参数，准备再测十遍", dim: "spirit", score: -1 },
+                { t: "指着屏幕上的噪点大呼小叫：'这就是新物理现象的证据！'", dim: "spirit", score: 1 },
+                { t: "精神极度亢奋，觉得自己发现了推翻现有理论的漏洞", dim: "spirit", score: 2 }
             ]},
             { q: "当论文查重率高达35%，而学校的降重死线就在明天中午：", options: [
-                { t: "连夜打印出来，一边哭一边用红笔一字一句地修改语病", dim: "tool", val: "A" },
-                { t: "翻开词典，把所有的'导致'改成'引发'，纯手工体力劳动", dim: "tool", val: "A" },
-                { t: "直接把飘红段落扔进翻译软件：中翻英翻日翻俄翻中", dim: "tool", val: "C" },
-                { t: "启动高级Prompt：'请以学术口吻重写以下段落并降低重复率'", dim: "tool", val: "C" }
+                { t: "连夜打印出来，一边哭一边用红笔一字一句地修改语病", dim: "tool", score: -2 },
+                { t: "翻开词典，把所有的'导致'改成'引发'，纯手工体力劳动", dim: "tool", score: -1 },
+                { t: "直接把飘红段落扔进翻译软件：中翻英翻日翻俄翻中", dim: "tool", score: 1 },
+                { t: "启动高级Prompt：'请以学术口吻重写以下段落并降低重复率'", dim: "tool", score: 2 }
             ]},
             { q: "组会上导师拷问：'为什么这批样品的数据这么烂？是不是操作问题？'", options: [
-                { t: "疯狂点头认错：'老师我马上排查，今晚重做'", dim: "diplo", val: "S" },
-                { t: "眼神躲闪，支支吾吾半天说不出一句完整的物理解释", dim: "diplo", val: "S" },
-                { t: "理直气壮反问：'这恰好证明了我们的表面修饰理论是对的！'", dim: "diplo", val: "H" },
-                { t: "当场在白板上画出能级图，跟导师激烈辩论30分钟", dim: "diplo", val: "H" }
+                { t: "疯狂点头认错：'老师我马上排查，今晚重做'", dim: "diplo", score: -2 },
+                { t: "眼神躲闪，支支吾吾半天说不出一句完整的物理解释", dim: "diplo", score: -1 },
+                { t: "理直气壮反问：'这恰好证明了我们的表面修饰理论是对的！'", dim: "diplo", score: 1 },
+                { t: "当场在白板上画出能级图，跟导师激烈辩论30分钟", dim: "diplo", score: 2 }
             ]},
             { q: "光谱上的特征峰看着非常歪斜、极其勉强：", options: [
-                { t: "原始数据长什么样就怎么画，扭曲得像发疯的蚯蚓也认了", dim: "data", val: "P" },
-                { t: "在附录里写上长篇大论的检讨，反思测试过程中的不足", dim: "data", val: "P" },
-                { t: "熟练使用平滑算法，把曲线搓得像教科书里的标准图一样圆润", dim: "data", val: "M" },
-                { t: "用极其华丽的辞藻，把残缺的峰值包装成罕见物理机制的证明", dim: "data", val: "M" }
+                { t: "原始数据长什么样就怎么画，扭曲得像发疯的蚯蚓也认了", dim: "data", score: -2 },
+                { t: "在附录里写上长篇大论的检讨，反思测试过程中的不足", dim: "data", score: -1 },
+                { t: "熟练使用平滑算法，把曲线搓得像教科书里的标准图一样圆润", dim: "data", score: 1 },
+                { t: "用极其华丽的辞藻，把残缺的峰值包装成罕见物理机制的证明", dim: "data", score: 2 }
             ]},
             { q: "半夜两点，你在实验室走廊迎面撞见了同样熬夜的导师：", options: [
-                { t: "心跳骤停，立刻转身假装去厕所，祈祷他没看见我", dim: "diplo", val: "S" },
-                { t: "低着头贴着墙根光速溜走，只留下一句含糊不清的'老师好'", dim: "diplo", val: "S" },
-                { t: "大步迎上去：'老师您还没走？正好我这有个理论问题！'", dim: "diplo", val: "H" },
-                { t: "面带自信的微笑：'老师早点休息，我的数据马上就完美了'", dim: "diplo", val: "H" }
+                { t: "心跳骤停，立刻转身假装去厕所，祈祷他没看见我", dim: "diplo", score: -2 },
+                { t: "低着头贴着墙根光速溜走，只留下一句含糊不清的'老师好'", dim: "diplo", score: -1 },
+                { t: "面带自信的微笑：'老师早点休息，我的数据马上就完美了'", dim: "diplo", score: 1 },
+                { t: "大步迎上去：'老师您还没走？正好我这有个理论问题！'", dim: "diplo", score: 2 }
             ]},
             { q: "写“致谢(Acknowledgements)”时，你要提到刚刚骂过你的导师，真实心态是：", options: [
                 { t: "无情打字机。套用学长模板，不多加一个词，查重过就行", abi: -1 },
@@ -225,28 +306,28 @@
                 { t: "打字时流下热泪。被骂了大半年，但恩师确实重如山", abi: 3 }
             ]},
             { q: "发现自己辛辛苦苦熬夜测出的数据，被同门一不小心删了：", options: [
-                { t: "一言不发地坐下，感觉灵魂被抽干，变成一具空壳", dim: "spirit", val: "Y" },
-                { t: "默默打开回收站和备份文件夹，绝望地翻找三个小时", dim: "spirit", val: "Y" },
-                { t: "在实验室发出反派般的狂笑，感觉这世界就是个巨大的草台班子", dim: "spirit", val: "D" },
-                { t: "直接拔剑（键盘），当场和同门上演全武行", dim: "spirit", val: "D" }
+                { t: "一言不发地坐下，感觉灵魂被抽干，变成一具空壳", dim: "spirit", score: -2 },
+                { t: "默默打开回收站和备份文件夹，绝望地翻找三个小时", dim: "spirit", score: -1 },
+                { t: "在实验室发出反派般的狂笑，感觉这世界就是个巨大的草台班子", dim: "spirit", score: 1 },
+                { t: "直接拔剑（键盘），当场和同门上演全武行", dim: "spirit", score: 2 }
             ]},
             { q: "阅读海量全英文顶级期刊文献时你的常态是：", options: [
-                { t: "打印出来拿荧光笔逐字翻译，一天半篇，但感觉踏实", dim: "tool", val: "A" },
-                { t: "开着词典一个个查生词，遇到复杂句型就手绘语法树", dim: "tool", val: "A" },
-                { t: "一键喂给AI：'总结这50篇文献的核心观点'", dim: "tool", val: "C" },
-                { t: "利用插件一秒生成思维导图，连正文都不看直接抄引用", dim: "tool", val: "C" }
+                { t: "打印出来拿荧光笔逐字翻译，一天半篇，但感觉踏实", dim: "tool", score: -2 },
+                { t: "开着词典一个个查生词，遇到复杂句型就手绘语法树", dim: "tool", score: -1 },
+                { t: "一键喂给AI：'总结这50篇文献的核心观点'", dim: "tool", score: 1 },
+                { t: "利用插件一秒生成思维导图，连正文都不看直接抄引用", dim: "tool", score: 2 }
             ]},
             { q: "实验急需新买一批试剂，但导师之前刚开会说组里经费紧张：", options: [
-                { t: "绝对不敢提，自己偷偷自费买，或者去隔壁课题组蹭一点", dim: "diplo", val: "S" },
-                { t: "犹豫了一周，最后在微信上发了几百字卑微的申请长文", dim: "diplo", val: "S" },
-                { t: "直接拿着采购单进办公室：'老师，不买这实验真做不下去了'", dim: "diplo", val: "H" },
-                { t: "先斩后奏，买完直接把发票拍在导师桌上等报销", dim: "diplo", val: "H" }
+                { t: "绝对不敢提，自己偷偷自费买，或者去隔壁课题组蹭一点", dim: "diplo", score: -2 },
+                { t: "犹豫了一周，最后在微信上发了几百字卑微的申请长文", dim: "diplo", score: -1 },
+                { t: "直接拿着采购单进办公室：'老师，不买这实验真做不下去了'", dim: "diplo", score: 1 },
+                { t: "先斩后奏，买完直接把发票拍在导师桌上等报销", dim: "diplo", score: 2 }
             ]},
             { q: "盲审意见回来，专家指出你推导的公式有严重漏洞：", options: [
-                { t: "天塌了。乖乖认错，把整个第三章推倒重写", dim: "data", val: "P" },
-                { t: "陷入极度自我怀疑，觉得专家的每一句话都是在扇自己的脸", dim: "data", val: "P" },
-                { t: "避重就轻，在回复信里疯狂用其他文献的偏门理论来给自己圆谎", dim: "data", val: "M" },
-                { t: "退至众人身后：'只要我强行解释成量子效应，专家就看不出破绽'", dim: "data", val: "M" }
+                { t: "天塌了。乖乖认错，把整个第三章推倒重写", dim: "data", score: -2 },
+                { t: "陷入极度自我怀疑，觉得专家的每一句话都是在扇自己的脸", dim: "data", score: -1 },
+                { t: "避重就轻，在回复信里疯狂用其他文献的偏门理论来给自己圆谎", dim: "data", score: 1 },
+                { t: "退至众人身后：'只要我强行解释成量子效应，专家就看不出破绽'", dim: "data", score: 2 }
             ]},
             { q: "答辩结束、拿到双证的那一刻，你打算如何处理导师的微信？", options: [
                 { t: "立刻设置'仅聊天'或屏蔽朋友圈，此生最好死生不复相见", abi: -1 },
@@ -255,28 +336,28 @@
                 { t: "主动发合影朋友圈，并真诚表示'以后一定常回实验室看看'", abi: 4 }
             ]},
             { q: "看着别人家的器件性能爆表，而你的样品连个响应信号都没有：", options: [
-                { t: "深夜 emo，坐在走廊台阶上抽烟/叹气，觉得自己选错了专业", dim: "spirit", val: "Y" },
-                { t: "严重内耗，连着三天吃不下饭，梦里都在洗滴定管", dim: "spirit", val: "Y" },
-                { t: "无所谓，把这称之为'对暗物质的探索'，精神状态遥遥领先", dim: "spirit", val: "D" },
-                { t: "边做实验边大声播放摇滚乐，认为失败才是科研的常态", dim: "spirit", val: "D" }
+                { t: "深夜 emo，坐在走廊台阶上抽烟/叹气，觉得自己选错了专业", dim: "spirit", score: -2 },
+                { t: "严重内耗，连着三天吃不下饭，梦里都在洗滴定管", dim: "spirit", score: -1 },
+                { t: "无所谓，把这称之为'对暗物质的探索'，精神状态遥遥领先", dim: "spirit", score: 1 },
+                { t: "边做实验边大声播放摇滚乐，认为失败才是科研的常态", dim: "spirit", score: 2 }
             ]},
             { q: "遇到完全画不出来的复杂实验装置图或机理图时：", options: [
-                { t: "打开PPT，用基础的圆圈和方块一点点拼，朴实无华", dim: "tool", val: "A" },
-                { t: "花一整天看教程学3D Max/Maya，硬核手工建模", dim: "tool", val: "A" },
-                { t: "直接用 Midjourney/DALL-E 生成，再用PS稍微改改字", dim: "tool", val: "C" },
-                { t: "上学术论坛花几十块钱买个模板一键套用，能省事绝不手画", dim: "tool", val: "C" }
+                { t: "花一整天看教程学3D Max/Maya，硬核手工建模", dim: "tool", score: -2 },
+                { t: "打开PPT，用基础的圆圈和方块一点点拼，朴实无华", dim: "tool", score: -1 },
+                { t: "直接用 Midjourney/DALL-E 生成，再用PS稍微改改字", dim: "tool", score: 1 },
+                { t: "上学术论坛花几十块钱买个模板一键套用，能省事绝不手画", dim: "tool", score: 2 }
             ]},
             { q: "当你的观点和导师在组会上发生严重分歧时：", options: [
-                { t: "立刻闭嘴，'老师您说得对'，哪怕知道他其实是错的", dim: "diplo", val: "S" },
-                { t: "表面迎合，背地里依然按自己的做法偷偷搞", dim: "diplo", val: "S" },
-                { t: "当着所有同门的面指出导师的逻辑漏洞，场面一度十分尴尬", dim: "diplo", val: "H" },
-                { t: "拿着一摞打印好的顶刊文献拍在桌子上，证明自己才是对的", dim: "diplo", val: "H" }
+                { t: "立刻闭嘴，'老师您说得对'，哪怕知道他其实是错的", dim: "diplo", score: -2 },
+                { t: "表面迎合，背地里依然按自己的做法偷偷搞", dim: "diplo", score: -1 },
+                { t: "当着所有同门的面指出导师的逻辑漏洞，场面一度十分尴尬", dim: "diplo", score: 1 },
+                { t: "拿着一摞打印好的顶刊文献拍在桌子上，证明自己才是对的", dim: "diplo", score: 2 }
             ]},
             { q: "测试仪器坏了，导致你的毕业数据缺了最关键的一环：", options: [
-                { t: "只能老老实实延期答辩，等仪器修好再测", dim: "data", val: "P" },
-                { t: "花大价钱跨省找其他学校借仪器补测，坚守真实底线", dim: "data", val: "P" },
-                { t: "拿以前做废的旧数据，改改坐标轴名称强行顶上", dim: "data", val: "M" },
-                { t: "无中生有，根据文献上的规律自己'手搓'画一条完美的曲线", dim: "data", val: "M" }
+                { t: "只能老老实实延期答辩，等仪器修好再测", dim: "data", score: -2 },
+                { t: "花大价钱跨省找其他学校借仪器补测，坚守真实底线", dim: "data", score: -1 },
+                { t: "拿以前做废的旧数据，改改坐标轴名称强行顶上", dim: "data", score: 1 },
+                { t: "无中生有，根据文献上的规律自己'手搓'画一条完美的曲线", dim: "data", score: 2 }
             ]},
             { q: "如果学弟学妹来向你打听导师的为人，你会：", options: [
                 { t: "冷漠脸：'快跑，别怪我没提醒你。'", abi: -1 },
@@ -286,66 +367,29 @@
             ]}
         ];
 
-        // 16人格库 + 详细诊断报告
+        // 🌟 16人格字典的 Key 已经完全对齐生成的 Y/D(精神) + A/C(工具) + S/H(外交) + P/M(数据) 结构
         const personalityMap = {
-            // 天命牛马派
-            YASP: { name: "苦行僧", group: "天命牛马派", desc: "纯手工硬熬，极度害怕导师。数据再烂也自己扛。", tags: ["内耗王者","老实人","命硬","不敢吱声"], icon: "fa-link", color: "text-cyber-orange",
-                report: { core: "极致的内耗与极致的纯粹。你坚信只有肉体和精神的双重折磨才能换来真理，数据再难看也绝不用魔法修改。", guide: "多喝热水，少看别人的朋友圈。你需要建立自信，学会和导师进行基础沟通，而不是单方面承受压力。", fate: "通常会惊险度过答辩，拿着感动天地的真实数据毕业，但大概率发誓这辈子不再碰科研。" }
-            },
-            YACP: { name: "赛博怨种", group: "天命牛马派", desc: "会用AI辅助，但面对烂数据深夜崩溃，不敢求助。", tags: ["赛博苦手","焦虑","老实人","自闭"], icon: "fa-microchip", color: "text-cyber-blue",
-                report: { core: "AI能帮你写代码算数据，却帮不了你洗烧杯。你掌握了先进的生产力工具，却依然被真实的物理世界无情毒打。", guide: "不要试图用大模型解释仪器的玄学故障，承认实验本身的失败并不丢人。", fate: "靠着AI润色的完美论文格式和凑合的数据平稳落地，最终去互联网公司当个踏实的打工人。" }
-            },
-            YHAP: { name: "倔强老黄牛", group: "天命牛马派", desc: "纯手工，数据一塌糊涂，但头铁敢和导师冷战。", tags: ["头铁","不造假","硬刚","老实"], icon: "fa-shield", color: "text-cyber-orange",
-                report: { core: "不服输，不造假，也不服导师。你是实验室里最硬的石头，宁愿延期也绝不低头修改原则。", guide: "适当低头不会掉皇冠，只会让你少挨骂。学术争论不要上升为人身攻击。", fate: "用最差的关系，做最硬的数据。答辩时导师可能不在场，但你的数据立得住，堂堂正正离开。" }
-            },
-            YHCP: { name: "赛博死士", group: "天命牛马派", desc: "拿着AI总结的失败原因去和导师硬碰硬。", tags: ["赛博战士","头铁","不造假","敢死"], icon: "fa-shield-virus", color: "text-cyber-cyan",
-                report: { core: "用最前沿的AI技术武装自己，去打一场注定失败的仗。你甚至会用ChatGPT写一份一万字的实验崩盘分析报告甩给导师。", guide: "留点余地，导师也是人，也会心梗。你的硬核应该用在探索新思路上，而不是在死胡同里撞墙。", fate: "导师被你的“真诚与硬核”彻底打败，叹息着帮你修改致谢，放你毕业。" }
-            },
+            YASP: { name: "苦行僧", group: "牛马派", desc: "纯手工硬熬，极度害怕导师。数据再烂也自己扛。", tags: ["内耗","手工","怂","真实"], icon: "fa-link", color: "text-cyber-orange", report: { core: "极致的内耗与极致的纯粹。你坚信只有肉体和精神的双重折磨才能换来真理，数据再难看也绝不用魔法修改。", guide: "多喝热水，少看别人的朋友圈。你需要建立自信，学会和导师进行基础沟通，而不是单方面承受压力。", fate: "通常会惊险度过答辩，拿着感动天地的真实数据毕业，但大概率发誓这辈子不再碰科研。" }},
+            YCSP: { name: "赛博怨种", group: "牛马派", desc: "会用AI辅助，但面对烂数据深夜崩溃，不敢求助。", tags: ["内耗","赛博","怂","真实"], icon: "fa-microchip", color: "text-cyber-blue", report: { core: "AI能帮你写代码算数据，却帮不了你洗烧杯。你掌握了先进的生产力工具，却依然被真实的物理世界无情毒打。", guide: "不要试图用大模型解释仪器的玄学故障，承认实验本身的失败并不丢人。", fate: "靠着AI润色的完美论文格式和凑合的数据平稳落地，最终去互联网公司当个踏实的打工人。" }},
+            YAHP: { name: "老黄牛", group: "牛马派", desc: "纯手工，数据一塌糊涂，但头铁敢和导师冷战。", tags: ["内耗","手工","刚","真实"], icon: "fa-shield", color: "text-cyber-orange", report: { core: "不服输，不造假，也不服导师。你是实验室里最硬的石头，宁愿延期也绝不低头修改原则。", guide: "适当低头不会掉皇冠，只会让你少挨骂。学术争论不要上升为人身攻击。", fate: "用最差的关系，做最硬的数据。答辩时导师可能不在场，但你的数据立得住，堂堂正正离开。" }},
+            YCHP: { name: "赛博死士", group: "牛马派", desc: "拿着AI总结的失败原因去和导师硬碰硬。", tags: ["内耗","赛博","刚","真实"], icon: "fa-shield-virus", color: "text-cyber-cyan", report: { core: "用最前沿的AI技术武装自己，去打一场注定失败的仗。你甚至会用ChatGPT写一份一万字的实验崩盘分析报告甩给导师。", guide: "留点余地，导师也是人，也会心梗。你的硬核应该用在探索新思路上，而不是在死胡同里撞墙。", fate: "导师被你的“真诚与硬核”彻底打败，叹息着帮你修改致谢，放你毕业。" }},
             
-            // 暗黑炼丹派
-            YASM: { name: "幽灵法师", group: "暗黑炼丹派", desc: "深夜偷偷改图，答辩时心虚得满头大汗。", tags: ["阴暗","造假","心虚","胆小"], icon: "fa-ghost", color: "text-cyber-purple",
-                report: { core: "白天消失，深夜施法。你不敢面对真实的失败，选择用手工修图来逃避现实，但你的良知又让你每天活在被拆穿的恐惧中。", guide: "练好心理素质，答辩时腿别抖。以及，修图的时候别忘了抹除元数据。", fate: "侥幸盲审过关，但每当有人提到学术不端，你都会心跳漏一拍，一辈子活在阴影下。" }
-            },
-            YACM: { name: "赛博造假商", group: "暗黑炼丹派", desc: "数据魔法+AI编造，每天恐慌怕被看穿。", tags: ["赛博造假","心虚","阴暗","求稳"], icon: "fa-wand-magic-sparkles", color: "text-cyber-cyan",
-                report: { core: "魔法处理的数据加上大模型生成的完美解析，你构建了一个没有破绽的虚假乌托邦，但你自己知道那是个泡沫。", guide: "祈祷盲审专家不懂你的细分领域，或者学校没开AI查重检测。", fate: "凭借极具迷惑性的论文顺利毕业，立刻转行，注销所有学术账号并销毁原始硬盘数据。" }
-            },
-            YHAM: { name: "阴郁骗徒", group: "暗黑炼丹派", desc: "手工修饰数据，内耗但面对质疑咬死不认。", tags: ["头铁","造假","嘴硬","阴郁"], icon: "fa-mask", color: "text-cyber-purple",
-                report: { core: "一边造假一边极度内耗恐慌，但奇妙的是，一旦面临真实质疑，你却能爆发出惊人的嘴硬能力和防御机制。", guide: "与其在深夜内耗自责，不如多花点时间把圆谎的逻辑闭环做得更严密一点。", fate: "在答辩现场凭借“只要我不心虚，心虚的就是评委”的信念死里逃生。" }
-            },
-            YHCM: { name: "西装暴徒", group: "暗黑炼丹派", desc: "伪造天衣无缝，用高深AI话术糊弄导师。", tags: ["演技派","赛博高手","嘴强王者"], icon: "fa-user-secret", color: "text-cyber-yellow",
-                report: { core: "穿着最得体的西装，干着最狠的学术造假。AI是你掩饰空虚的最高级外壳，你用最专业的术语讲述最离谱的谎言。", guide: "保持你的高冷人设，少说话多装深沉，言多必失。", fate: "成功骗过所有人，甚至可能拿到优秀毕业生，但午夜梦回时，内心始终是一片虚无。" }
-            },
+            YASM: { name: "幽灵法师", group: "暗黑炼丹", desc: "深夜偷偷改图，答辩时心虚得满头大汗。", tags: ["内耗","手工","怂","魔法"], icon: "fa-ghost", color: "text-cyber-purple", report: { core: "白天消失，深夜施法。你不敢面对真实的失败，选择用手工修图来逃避现实，但你的良知又让你每天活在被拆穿的恐惧中。", guide: "练好心理素质，答辩时腿别抖。以及，修图的时候别忘了抹除元数据。", fate: "侥幸盲审过关，但每当有人提到学术不端，你都会心跳漏一拍，一辈子活在阴影下。" }},
+            YCSM: { name: "造假商", group: "暗黑炼丹", desc: "数据魔法+AI编造，每天恐慌怕被看穿。", tags: ["内耗","赛博","怂","魔法"], icon: "fa-wand-magic-sparkles", color: "text-cyber-cyan", report: { core: "魔法处理的数据加上大模型生成的完美解析，你构建了一个没有破绽的虚假乌托邦，但你自己知道那是个泡沫。", guide: "祈祷盲审专家不懂你的细分领域，或者学校没开AI查重检测。", fate: "凭借极具迷惑性的论文顺利毕业，立刻转行，注销所有学术账号并销毁原始硬盘数据。" }},
+            YAHM: { name: "阴郁骗徒", group: "暗黑炼丹", desc: "手工修饰数据，内耗但面对质疑咬死不认。", tags: ["内耗","手工","刚","魔法"], icon: "fa-mask", color: "text-cyber-purple", report: { core: "一边造假一边极度内耗恐慌，但奇妙的是，一旦面临真实质疑，你却能爆发出惊人的嘴硬能力和防御机制。", guide: "与其在深夜内耗自责，不如多花点时间把圆谎的逻辑闭环做得更严密一点。", fate: "在答辩现场凭借“只要我不心虚，心虚的就是评委”的信念死里逃生。" }},
+            YCHM: { name: "西装暴徒", group: "暗黑炼丹", desc: "伪造天衣无缝，用高深AI话术糊弄导师。", tags: ["内耗","赛博","刚","魔法"], icon: "fa-user-secret", color: "text-cyber-yellow", report: { core: "穿着最得体的西装，干着最狠的学术造假。AI是你掩饰空虚的最高级外壳，你用最专业的术语讲述最离谱的谎言。", guide: "保持你的高冷人设，少说话多装深沉，言多必失。", fate: "成功骗过所有人，甚至可能拿到优秀毕业生，但午夜梦回时，内心始终是一片虚无。" }},
             
-            // 狂战士派
-            DASP: { name: "癫狂矿工", group: "狂战士派", desc: "手工算数据算到失常，对着设备大笑。", tags: ["发癫","不造假","野生","乐子人"], icon: "fa-hammer", color: "text-cyber-red",
-                report: { core: "在枯燥的重复劳动中精神失常，把苦难当成了笑话。你是一个坚守真实底线的疯子，把烂数据当成先锋艺术。", guide: "建议实验室常备降压药和甜食。小心不要把实验仪器当成架子鼓敲击。", fate: "在答辩现场突然发癫大笑，评委以为你悟道了，被你的气场震慑，顺利授予学位。" }
-            },
-            DACP: { name: "科技狂人", group: "狂战士派", desc: "用高端AI产出真实废料，沉浸在自己的赛博世界。", tags: ["赛博疯子","自娱自乐","硬核"], icon: "fa-robot", color: "text-cyber-pink",
-                report: { core: "沉浸在工具的狂欢中。对你来说，实验结果根本不重要，写数据抓取脚本和高阶宏命令的过程才重要。", guide: "请时刻记住你的首要目的是拿毕业证，而不是给实验室开发全自动化的软件系统。", fate: "把写论文的时间全用来写工具，最后花一天时间糊弄出一篇论文毕业，转行去当了全栈工程师。" }
-            },
-            DHAP: { name: "暴躁纯爱战士", group: "狂战士派", desc: "坚守真实数据，导师敢骂就敢当面掀桌子。", tags: ["暴躁","不造假","纯爱","战神"], icon: "fa-fire", color: "text-cyber-red",
-                report: { core: "眼里揉不得一点沙子。数据是你的命，谁动谁死，导师也不例外。你用最狂暴的态度守护最纯真的学术底线。", guide: "收一收脾气，不然你的毕业证和导师只能活一个。学会“柔和地坚持真理”。", fate: "用无可辩驳的真实烂数据硬核毕业。离开那天，可能是整个课题组这三年来最安静的一天。" }
-            },
-            DHCP: { name: "钢铁侠", group: "狂战士派", desc: "用AI包装真实烂数据成革命性叙事，正面对决导师。", tags: ["赛博战神","硬核","嘴强","稳定"], icon: "fa-bolt", color: "text-cyber-cyan",
-                report: { core: "情绪极其稳定，硬核至极。擅长用先进AI把一坨真实的烂泥雕刻成艺术品，并且有底气拿着它当面和导师对峙。", guide: "保持你强大的宏大叙事能力，你是天生的PPT演说家和概念包装大师。", fate: "凭借降维打击般的逻辑框架和工具使用能力，不仅顺利毕业，还能在组里留下“那个传说中的猛人”的名号。" }
-            },
+            DASP: { name: "癫狂矿工", group: "狂战士", desc: "手工算数据算到失常，对着设备大笑。", tags: ["发癫","手工","怂","真实"], icon: "fa-hammer", color: "text-cyber-red", report: { core: "在枯燥的重复劳动中精神失常，把苦难当成了笑话。你是一个坚守真实底线的疯子，把烂数据当成先锋艺术。", guide: "建议实验室常备降压药和甜食。小心不要把实验仪器当成架子鼓敲击。", fate: "在答辩现场突然发癫大笑，评委以为你悟道了，被你的气场震慑，顺利授予学位。" }},
+            DCSP: { name: "科技狂人", group: "狂战士", desc: "用AI产出真实废料，沉浸在赛博世界。", tags: ["发癫","赛博","怂","真实"], icon: "fa-robot", color: "text-cyber-pink", report: { core: "沉浸在工具的狂欢中。对你来说，实验结果根本不重要，写数据抓取脚本和高阶宏命令的过程才重要。", guide: "请时刻记住你的首要目的是拿毕业证，而不是给实验室开发全自动化的软件系统。", fate: "把写论文的时间全用来写工具，最后花一天时间糊弄出一篇论文毕业，转行去当了全栈工程师。" }},
+            DAHP: { name: "纯爱战士", group: "狂战士", desc: "坚守真实数据，导师敢骂就掀桌子。", tags: ["发癫","手工","刚","真实"], icon: "fa-fire", color: "text-cyber-red", report: { core: "眼里揉不得一点沙子。数据是你的命，谁动谁死，导师也不例外。你用最狂暴的态度守护最纯真的学术底线。", guide: "收一收脾气，不然你的毕业证和导师只能活一个。学会“柔和地坚持真理”。", fate: "用无可辩驳的真实烂数据硬核毕业。离开那天，可能是整个课题组这三年来最安静的一天。" }},
+            DCHP: { name: "钢铁侠", group: "狂战士", desc: "AI包装真实烂数据成革命性叙事，对决导师。", tags: ["发癫","赛博","刚","真实"], icon: "fa-bolt", color: "text-cyber-cyan", report: { core: "情绪极其稳定，硬核至极。擅长用先进AI把一坨真实的烂泥雕刻成艺术品，并且有底气拿着它当面和导师对峙。", guide: "保持你强大的宏大叙事能力，你是天生的PPT演说家和概念包装大师。", fate: "凭借降维打击般的逻辑框架和工具使用能力，不仅顺利毕业，还能在组里留下“那个传说中的猛人”的名号。" }},
             
-            // 法外狂徒派
-            DASM: { name: "狂笑魔术师", group: "法外狂徒派", desc: "粗糙篡改数据还发癫狂笑，导师面前却战略性认怂。", tags: ["乐子人","造假","狂笑","演技"], icon: "fa-face-laugh-squint", color: "text-cyber-yellow",
-                report: { core: "虚无主义的学术混子。觉得科研就是过家家，随便改改数据大家乐呵乐呵得了，内心极度发癫，表面却能屈能伸。", guide: "注意隐藏你的乐子人属性，你觉得好笑的数据篡改，在导师眼里可能是脑溢血的诱因。", fate: "靠着厚脸皮、不错的运气和一点小聪明，混过盲审和答辩，从此学术圈江湖不见。" }
-            },
-            DACM: { name: "赛博神棍", group: "法外狂徒派", desc: "全自动造假流水线。数据魔法，文字AI，情绪演戏。", tags: ["赛博骗子","全自动","演技拉满"], icon: "fa-code", color: "text-cyber-pink",
-                report: { core: "彻头彻尾的赛博表演艺术家。你建立了从数据伪造到AI行文的全自动流水线，连你对科研的热情都是演给导师看的。", guide: "多给你的AI助手充几个高级会员吧，在这个冰冷的学术世界里，它是你唯一的“亲人”。", fate: "凭借华丽到夸张的辞藻和完美无瑕的虚假数据，在答辩中混得风生水起，如鱼得水。" }
-            },
-            DHAM: { name: "微操大师", group: "法外狂徒派", desc: "拿半真半假数据忽悠导师，戳穿也能笑着圆过去。", tags: ["情商拉满","造假","头铁","嘴强"], icon: "fa-chess-knight", color: "text-cyber-pink",
-                report: { core: "高情商造假的天才。你用半真半假的数据，配上无懈可击的临场反应，把导师和评委忽悠得团团转。", guide: "小心常在河边走，哪有不湿鞋。遇到真正懂行的较真专家，你的话术容易瞬间翻车。", fate: "有惊无险地度过每一场汇报。你最终会发现，你极高的情商和圆场能力，比你的论文本身有价值得多。" }
-            },
-            DHCM: { name: "学术悍匪", group: "法外狂徒派", desc: "AI写作+魔法数据+贴脸开大，毫无愧疚还要求评优。", tags: ["版本T0","终极悍匪","毫无心理负担"], icon: "fa-skull-crossbones", color: "text-cyber-yellow",
-                report: { core: "版本 T0 真神。AI大模型写文+魔法修改数据+毫无愧疚感+疯狂骑脸输出。你不仅要毕业，还要征服这片学术废土。", guide: "没有生存指南，因为你本身就是法则。但建议毕业后不要从政，你的胆子太大了。", fate: "踩着导师和评委的底线疯狂试探，最终靠着无与伦比的悍匪气场和完美闭环的虚假叙事，拿下双证甚至校级优秀论文，随后深藏功与名。" }
-            }
+            DASM: { name: "魔术师", group: "法外狂徒", desc: "篡改数据还发癫狂笑，导师面前却战略认怂。", tags: ["发癫","手工","怂","魔法"], icon: "fa-face-laugh-squint", color: "text-cyber-yellow", report: { core: "虚无主义的学术混子。觉得科研就是过家家，随便改改数据大家乐呵乐呵得了，内心极度发癫，表面却能屈能伸。", guide: "注意隐藏你的乐子人属性，你觉得好笑的数据篡改，在导师眼里可能是脑溢血的诱因。", fate: "靠着厚脸皮、不错的运气和一点小聪明，混过盲审和答辩，从此学术圈江湖不见。" }},
+            DCSM: { name: "赛博神棍", group: "法外狂徒", desc: "造假流水线。数据魔法，文字AI，情绪演戏。", tags: ["发癫","赛博","怂","魔法"], icon: "fa-code", color: "text-cyber-pink", report: { core: "彻头彻尾的赛博表演艺术家。你建立了从数据伪造到AI行文的全自动流水线，连你对科研的热情都是演给导师看的。", guide: "多给你的AI助手充几个高级会员吧，在这个冰冷的学术世界里，它是你唯一的“亲人”。", fate: "凭借华丽到夸张的辞藻和完美无瑕的虚假数据，在答辩中混得风生水起，如鱼得水。" }},
+            DAHM: { name: "微操大师", group: "法外狂徒", desc: "半真半假数据忽悠，戳穿也能笑着圆过去。", tags: ["发癫","手工","刚","魔法"], icon: "fa-chess-knight", color: "text-cyber-pink", report: { core: "高情商造假的天才。你用半真半假的数据，配上无懈可击的临场反应，把导师和评委忽悠得团团转。", guide: "小心常在河边走，哪有不湿鞋。遇到真正懂行的较真专家，你的话术容易瞬间翻车。", fate: "有惊无险地度过每一场汇报。你最终会发现，你极高的情商和圆场能力，比你的论文本身有价值得多。" }},
+            DCHM: { name: "学术悍匪", group: "法外狂徒", desc: "AI写作+魔法数据+贴脸开大，毫无愧疚。", tags: ["发癫","赛博","刚","魔法"], icon: "fa-skull-crossbones", color: "text-cyber-yellow", report: { core: "版本 T0 真神。AI大模型写文+魔法修改数据+毫无愧疚感+疯狂骑脸输出。你不仅要毕业，还要征服这片学术废土。", guide: "没有生存指南，因为你本身就是法则。但建议毕业后不要从政，你的胆子太大了。", fate: "踩着导师和评委的底线疯狂试探，最终靠着无与伦比的悍匪气场和完美闭环的虚假叙事，拿下双证甚至校级优秀论文，随后深藏功与名。" }}
         };
 
-        // ABI库
         const abiMap = {
             "-1": { level: "Level -1 绝对零度", desc: "物理隔离，一年说话不超十句", color: "text-cyber-blue" },
             "0": { level: "Level 0 薛定谔态", desc: "只在DDL出现，只会回复收到", color: "text-gray-400" },
@@ -355,7 +399,6 @@
             "4": { level: "Level 4 精神同构", desc: "你已成导师，建议直接保博", color: "text-cyber-red" }
         };
 
-        // DOM元素获取
         const startPage = document.getElementById('start-page');
         const quizPage = document.getElementById('quiz-page');
         const resultPage = document.getElementById('result-page');
@@ -369,30 +412,15 @@
         const progressBar = document.getElementById('progress-bar');
         const progressText = document.getElementById('progress-text');
         
-        // 结果页元素
-        const resultIcon = document.getElementById('result-icon');
-        const resultType = document.getElementById('result-type');
-        const resultCode = document.getElementById('result-code');
-        const resultDesc = document.getElementById('result-desc');
-        const resultTags = document.getElementById('result-tags');
-        const reportCore = document.getElementById('report-core');
-        const reportGuide = document.getElementById('report-guide');
-        const reportFate = document.getElementById('report-fate');
-        const abiLevel = document.getElementById('abi-level');
-        const abiDesc = document.getElementById('abi-desc');
-
-        // 全局状态记录
         let currentQuestion = 0;
         let userAnswers = new Array(questions.length).fill(null);
 
-        // 开始答题
         startBtn.addEventListener('click', () => {
             startPage.classList.add('hidden');
             quizPage.classList.remove('hidden');
             loadQuestion();
         });
 
-        // 加载题目
         function loadQuestion() {
             const q = questions[currentQuestion];
             questionText.textContent = `${currentQuestion + 1}. ${q.q}`;
@@ -413,9 +441,7 @@
                 }
 
                 div.addEventListener('click', () => {
-                    document.querySelectorAll('#options-container > div').forEach(el => {
-                        el.classList.remove('border-cyber-blue', 'bg-cyber-blue/20', 'shadow-[0_0_15px_rgba(6,182,212,0.3)]');
-                    });
+                    document.querySelectorAll('#options-container > div').forEach(el => el.classList.remove('border-cyber-blue', 'bg-cyber-blue/20', 'shadow-[0_0_15px_rgba(6,182,212,0.3)]'));
                     div.classList.add('border-cyber-blue', 'bg-cyber-blue/20', 'shadow-[0_0_15px_rgba(6,182,212,0.3)]');
                     userAnswers[currentQuestion] = option; 
                 });
@@ -423,48 +449,109 @@
             });
         }
 
-        // 下一题逻辑
         nextBtn.addEventListener('click', () => {
-            if (!userAnswers[currentQuestion]) {
-                alert('不要逃避，请做出你的选择！');
-                return;
-            }
-            if (currentQuestion < questions.length - 1) {
-                currentQuestion++;
-                loadQuestion();
-            } else {
-                showResult();
-            }
+            if (!userAnswers[currentQuestion]) return alert('不要逃避，请做出你的选择！');
+            if (currentQuestion < questions.length - 1) { currentQuestion++; loadQuestion(); } 
+            else showResult();
         });
 
-        // 上一题逻辑
         prevBtn.addEventListener('click', () => {
-            if (currentQuestion > 0) {
-                currentQuestion--;
-                loadQuestion();
-            }
+            if (currentQuestion > 0) { currentQuestion--; loadQuestion(); }
         });
 
-        // 计算并显示结果
+        // 🌟 核心修复区：绝对精准的 16宫格 坐标计算（完全分离各象限的锚点，杜绝重叠）
+        function getStaticQuadrantPos(codeStr) {
+            const [spirit, tool, diplo, data] = codeStr.split('');
+            
+            let left = 50;
+            let top = 50;
+
+            // X轴 (数据 + 工具)：左侧为真实(P)，右侧为魔法(M)；手工(A)靠外，赛博(C)靠内
+            if (data === 'P' && tool === 'A') left = 15;
+            if (data === 'P' && tool === 'C') left = 35;
+            if (data === 'M' && tool === 'C') left = 65;
+            if (data === 'M' && tool === 'A') left = 85;
+
+            // Y轴 (精神 + 外交)：上方为发癫(D)，下方为内耗(Y)；认怂(S)靠外，硬刚(H)靠内
+            if (spirit === 'D' && diplo === 'S') top = 15;
+            if (spirit === 'D' && diplo === 'H') top = 35;
+            if (spirit === 'Y' && diplo === 'H') top = 65;
+            if (spirit === 'Y' && diplo === 'S') top = 85;
+
+            return { left: `${left}%`, top: `${top}%` };
+        }
+
+        // 静态渲染所有点位（无动画，确保稳定加载）
+        function renderQuadrant(userCode) {
+            const container = document.getElementById('quadrant-dots-container');
+            container.innerHTML = ''; 
+            
+            Object.keys(personalityMap).forEach(code => {
+                const isUser = code === userCode;
+                const pos = getStaticQuadrantPos(code);
+                const p = personalityMap[code];
+                
+                const dot = document.createElement('div');
+                
+                if (isUser) {
+                    // 用户专属坐标点 (发光的粉色圆点)
+                    dot.className = `absolute w-6 h-6 -ml-[12px] -mt-[12px] rounded-full bg-cyber-pink/20 border-2 border-cyber-pink shadow-[0_0_20px_rgba(236,72,153,1)] z-30 flex items-center justify-center`;
+                    dot.style.left = pos.left;
+                    dot.style.top = pos.top;
+
+                    // 核心高光与固定气泡
+                    dot.innerHTML = `
+                        <div class="w-2 h-2 bg-white rounded-full shadow-[0_0_8px_white]"></div>
+                        <div class="absolute bottom-full mb-2 whitespace-nowrap bg-black/90 px-3 py-1.5 rounded-md text-xs border border-cyber-pink text-cyber-pink shadow-[0_0_15px_rgba(236,72,153,0.3)] pointer-events-none">
+                            <strong>📍 你确诊为: ${p.name}</strong>
+                        </div>
+                    `;
+                } else {
+                    // 其他 15 个人格的底图菱形点
+                    dot.className = `absolute w-2.5 h-2.5 -ml-[5px] -mt-[5px] rotate-45 bg-cyber-blue/40 border border-cyber-blue/60 shadow-[0_0_5px_rgba(6,182,212,0.5)] tooltip cursor-pointer z-20 hover:bg-cyber-pink hover:scale-150 transition-transform duration-200`;
+                    dot.style.left = pos.left;
+                    dot.style.top = pos.top;
+
+                    // Hover 提示（包裹层抵消菱形旋转）
+                    dot.innerHTML = `
+                        <div class="-rotate-45 pointer-events-none flex items-center justify-center w-full h-full">
+                            <div class="tooltip-text absolute bottom-full mb-2 whitespace-nowrap bg-black/90 px-2 py-1 rounded-md text-[10px] border border-white/20 text-white shadow-xl">
+                                <i class="fa-solid fa-user-secret mr-1 opacity-50"></i>${p.name}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                container.appendChild(dot);
+            });
+        }
+
         function showResult() {
             quizPage.classList.add('hidden');
             resultPage.classList.remove('hidden');
             
-            let counts = { Y: 0, D: 0, A: 0, C: 0, S: 0, H: 0, P: 0, M: 0 };
+            // 🌟 算法升级：初始化四个维度的正负光谱得分轴
+            let scores = { spirit: 0, tool: 0, diplo: 0, data: 0 };
             let abiScores = [];
             
             userAnswers.forEach(opt => {
-                if (opt.val) counts[opt.val]++;
+                // 常规题目作正负代数相加
+                if (opt.dim) scores[opt.dim] += opt.score;
+                // ABI 羁绊题目推入数组后续算平均
                 if (opt.abi !== undefined) abiScores.push(opt.abi);
             });
 
-            const spirit = counts.Y > counts.D ? "Y" : "D";
-            const tool = counts.A > counts.C ? "A" : "C";
-            const diplo = counts.S > counts.H ? "S" : "H";
-            const data = counts.P > counts.M ? "P" : "M";
+            // 🌟 结果判定：根据数轴正负，精准切分人格。
+            // 0分时根据心理学防御机制，默认退回牛马底色（Y/A/S/P）
+            const spirit = scores.spirit > 0 ? "D" : "Y";
+            const tool   = scores.tool   > 0 ? "C" : "A";
+            const diplo  = scores.diplo  > 0 ? "H" : "S";
+            const data   = scores.data   > 0 ? "M" : "P";
             
             const code = spirit + tool + diplo + data;
-            const p = personalityMap[code] || personalityMap.DHCM;
+            
+            // 字典已绝对对齐，直接取值即可，兜底为赛博怨种
+            const p = personalityMap[code] || personalityMap.YCSP; 
             
             let abi = abiMap["0"];
             if (abiScores.length > 0) {
@@ -473,34 +560,34 @@
                 abi = abiMap[abiKey];
             }
 
-            // 基础信息渲染
-            resultIcon.className = `fa-solid ${p.icon} text-7xl md:text-8xl animate-float-fast text-shadow-glow ${p.color}`;
-            resultType.textContent = `【${p.group}】${p.name}`;
-            resultType.className = `text-center text-3xl font-bold mb-2 tracking-wide text-shadow-glow ${p.color}`;
-            resultCode.textContent = `< CTSI-ID: ${code} >`;
-            resultDesc.textContent = p.desc;
+            document.getElementById('result-icon').className = `fa-solid ${p.icon} text-6xl md:text-7xl animate-float-fast text-shadow-glow ${p.color}`;
+            document.getElementById('result-type').textContent = `【${p.group}】${p.name}`;
+            document.getElementById('result-type').className = `text-center text-3xl font-bold mb-2 tracking-wide text-shadow-glow ${p.color}`;
+            document.getElementById('result-code').textContent = `< CTSI-ID: ${code} >`;
+            document.getElementById('result-desc').textContent = p.desc;
             
-            // 万字诊断报告渲染
-            reportCore.textContent = p.report.core;
-            reportGuide.textContent = p.report.guide;
-            reportFate.textContent = p.report.fate;
+            document.getElementById('report-core').textContent = p.report.core;
+            document.getElementById('report-guide').textContent = p.report.guide;
+            document.getElementById('report-fate').textContent = p.report.fate;
             
-            // 羁绊指数渲染
-            abiLevel.textContent = abi.level;
-            abiLevel.className = `text-center text-2xl font-bold mb-2 text-shadow-glow ${abi.color}`;
-            abiDesc.textContent = abi.desc;
+            const elAbiLevel = document.getElementById('abi-level');
+            elAbiLevel.textContent = abi.level;
+            elAbiLevel.className = `text-center text-2xl font-bold mb-1 text-shadow-glow ${abi.color}`;
+            document.getElementById('abi-desc').textContent = abi.desc;
 
-            // 标签渲染
-            resultTags.innerHTML = '';
+            const elTags = document.getElementById('result-tags');
+            elTags.innerHTML = '';
             p.tags.forEach(tag => {
                 const span = document.createElement('span');
-                span.className = `px-3 py-1 bg-white/10 border border-white/20 rounded-full text-sm font-medium ${p.color}`;
+                span.className = `px-3 py-1 bg-white/10 border border-white/20 rounded-full text-xs font-medium ${p.color}`;
                 span.textContent = tag;
-                resultTags.appendChild(span);
+                elTags.appendChild(span);
             });
+
+            // 渲染静态全息雷达图
+            renderQuadrant(code);
         }
 
-        // 重新测试
         restartBtn.addEventListener('click', () => {
             currentQuestion = 0;
             userAnswers.fill(null);
@@ -509,20 +596,11 @@
             loadQuestion();
         });
 
-        // 分享
         shareBtn.addEventListener('click', () => {
-            const rawCode = resultCode.textContent.replace('< CTSI-ID: ', '').replace(' >', '');
-            const text = `我确诊了赛博毕设综合征！\n🧪 人格：${resultType.textContent}\n🧬 基因：${rawCode}\n⛓️ 羁绊：${abiLevel.textContent}\n\n这测试太懂了，快来测你的毕设精神状态！`;
-            
-            if(navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text).then(() => {
-                    alert('诊断病历已复制！快去发给同门吧~');
-                }).catch(() => {
-                    alert('复制失败，请手动截图分享哦~');
-                });
-            } else {
-                alert('您的浏览器不支持一键复制，请手动截图分享您的确诊报告哦~');
-            }
+            const rawCode = document.getElementById('result-code').textContent.replace('< CTSI-ID: ', '').replace(' >', '');
+            const text = `我确诊了赛博毕设综合征！\n🧪 人格：${document.getElementById('result-type').textContent}\n🧬 基因：${rawCode}\n⛓️ 羁绊：${document.getElementById('abi-level').textContent}\n\n这测试太懂了，快来测你的毕设精神状态！`;
+            if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(() => alert('诊断病历已复制！')).catch(() => alert('复制失败，请手动截图'));
+            else alert('您的浏览器不支持一键复制，请手动截图');
         });
     });
     </script>
